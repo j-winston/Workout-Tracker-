@@ -30,25 +30,28 @@ def process_language(workout):
 
 
 def generate_payload(json_data):
-    exercise = json_data["exercises"][0]["user_input"]
-    duration = json_data["exercises"][0]["duration_min"]
-    calories = json_data["exercises"][0]["nf_calories"]
+    if len(json_data['exercises']) >= 1:
+        exercise = json_data["exercises"][0]["user_input"]
+        duration = json_data["exercises"][0]["duration_min"]
+        calories = json_data["exercises"][0]["nf_calories"]
 
-    dt = datetime.now()
-    time_now = dt.now().strftime("%-I:%M %p")
-    today_date = dt.date().strftime("%b %d, %Y")
+        dt = datetime.now()
+        time_now = dt.now().strftime("%-I:%M %p")
+        today_date = dt.date().strftime("%b %d, %Y")
 
-    payload = {
-        "workout": {
-            "date": today_date,
-            "time": time_now,
-            "exercise": exercise,
-            "duration": duration,
-            "calories": calories
+        payload = {
+            "workout": {
+                "date": today_date,
+                "time": time_now,
+                "exercise": exercise,
+                "duration": duration,
+                "calories": calories
+            }
         }
-    }
 
-    return payload
+        return payload
+    else:
+        return False
 
 
 def add_row(workout_event):
@@ -59,17 +62,18 @@ def add_row(workout_event):
 
 # ----------MAIN-------------
 
-workout_description = input("What was your activity and duration?: ")
+workout_description = input("What was your activity and duration?(in minutes or hours): ")
 
 json_workout = process_language(workout_description)
-json_payload = generate_payload(json_workout)
 
-add_row_reply = add_row(json_payload)
-print("\nSuccess. The following workout was added:\n")
-print(add_row_reply.text)
+if generate_payload(json_workout):
+    json_payload = generate_payload(json_workout)
+    add_row_reply = add_row(json_payload)
+    print("\nSuccess. The following workout was added:\n")
+    print(add_row_reply.text)
+else:
+    print("An error occurred. Workout not added")
 
-
-print(os.environ['SNAP_NAME'])
 
 
 
