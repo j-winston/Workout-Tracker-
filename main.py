@@ -1,7 +1,8 @@
-from config import NUTRIX_APP_ID, NUTRIX_API_KEY, SHEETY_USERNAME, SHEETY_AUTH_HEADER
+from config import NUTRIX_APP_ID, NUTRIX_API_KEY, SHEETY_USERNAME, SHEETY_AUTH_HEADER, SHEETY_SPREADSHEET
 import requests
 from datetime import datetime
 import os
+import json
 
 # this is the natural language processing api
 nutrix_endpoint = "https://trackapi.nutritionix.com/v2/natural/exercise"
@@ -55,17 +56,18 @@ def generate_payload(json_data):
 
 
 def add_row(workout_event):
-    add_row_endpoint = "https://api.sheety.co/1fdcf02c06e0765faaf4be8b9840dd16/myWorkouts/workouts"
+    add_row_endpoint = f"https://api.sheety.co/{SHEETY_SPREADSHEET}/myWorkouts/workouts"
     add_row_response = requests.post(url=add_row_endpoint, json=workout_event, headers=sheety_header)
     return add_row_response
 
 
 # ----------MAIN-------------
 
-workout_description = input("What was your activity and duration?(in minutes or hours): ")
+workout_description = input("What was your activity and duration? (in minutes or hours): ")
 
 json_workout = process_language(workout_description)
 
+# If there's a problem with user input, return an error
 if generate_payload(json_workout):
     json_payload = generate_payload(json_workout)
     add_row_reply = add_row(json_payload)
